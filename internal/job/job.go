@@ -1,6 +1,10 @@
 package job
 
-import "context"
+import (
+	"context"
+	"errors"
+	"fmt"
+)
 
 // ScanType is type of Job that has to be executed.
 type ScanType string
@@ -23,23 +27,37 @@ func New(scanType ScanType) *Job {
 	}
 }
 
-// Queue
-type Queue interface {
-	// Push adds new Job to queue.
-	Push(ctx context.Context, j *Job)
+// Channel
+type Channel interface {
+	// Send
+	Send(ctx context.Context, j *Job) error
 
-	// Pop returns next Job from queue.
-	Pop(ctx context.Context) *Job
+	// Stream
+	Stream(ctx context.Context) <-chan *Job
 }
 
-// jobQueue is Queue implementation that uses go chan.
-type jobQueue chan *Job
+// NewChannel
+func NewChannel(scanType ScanType, buffer int) Channel {
+	return &channel{
+		scanType: scanType,
+		jobs:     make(chan *Job, buffer),
+	}
+}
 
-// NewQueue inititializes new Queue with given buffer size.
-func NewQueue(buffer int) Queue { return make(jobQueue, buffer) }
+// channel implements Channel interface.
+type channel struct {
+	scanType ScanType
+	jobs     chan *Job
+}
 
-// Push sends Job to channel.
-func (q jobQueue) Push(_ context.Context, j *Job) { q <- j }
+func (ch *channel) Send(_ context.Context, j *Job) error {
+	if j.ScanType != ch.scanType {
+		return errors.New(
+			fmt.Sprintf("error: can't send %v job to %v channel", j.ScanType, ch.scanType),
+		)
+	}
+	ch.jobs <- j
+	return nil
+}
 
-// Pop returns next Job from channel.
-func (q jobQueue) Pop(_ context.Context) *Job { return <-q }
+func (ch *channel) Stream(_ context.Context) <-chan *Job { return ch.jobs }
