@@ -2,8 +2,8 @@ package job
 
 import (
 	"context"
-	"errors"
-	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 // ScanType is type of Job that has to be executed.
@@ -52,8 +52,9 @@ type channel struct {
 
 func (ch *channel) Send(_ context.Context, j *Job) error {
 	if j.ScanType != ch.scanType {
-		return errors.New(
-			fmt.Sprintf("error: can't send %v job to %v channel", j.ScanType, ch.scanType),
+		return errors.Errorf(
+			"error: can't send %s job to %s channel",
+			j.ScanType, ch.scanType,
 		)
 	}
 	ch.jobs <- j
