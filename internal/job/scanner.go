@@ -14,7 +14,7 @@ type Scanner interface {
 type ScanFunc func(payload interface{}) interface{}
 
 // Scan
-func Scan(scanner Scanner) func(interface{}) interface{} {
+func Scan(scanner Scanner) ScanFunc {
 	return func(payload interface{}) interface{} {
 		j, ok := payload.(*Job)
 		if !ok {
@@ -22,7 +22,7 @@ func Scan(scanner Scanner) func(interface{}) interface{} {
 			return nil
 		}
 		if err := scanner.ScanJob(j); err != nil {
-			log.Printf("error scanning web job: %v\n", err)
+			log.Printf("couldn't scan job: %v\n", err)
 		}
 		return nil
 	}
