@@ -29,6 +29,6 @@ func (c *Controller) Start(ctx context.Context) {
 				log.Printf("failed to process job: %v\n", err)
 				return
 			}
-		}(c.channel.Stream())
+		}(c.channel.stream())
 	}
 }

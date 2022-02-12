@@ -9,8 +9,8 @@ type Channel interface {
 	// Send
 	Send(j *Job) error
 
-	// Stream
-	Stream() <-chan *Job
+	// stream
+	stream() <-chan *Job
 }
 
 // channel implements Channel interface.
@@ -38,4 +38,4 @@ func (ch *channel) Send(j *Job) error {
 	return nil
 }
 
-func (ch *channel) Stream() <-chan *Job { return ch.jobs }
+func (ch *channel) stream() <-chan *Job { return ch.jobs }
