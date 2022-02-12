@@ -1,6 +1,10 @@
 package web
 
 import (
+	"fmt"
+	"log"
+	"strings"
+
 	"github.com/gocolly/colly"
 	"github.com/mgajin/keyword-counter/internal/job"
 	"github.com/pkg/errors"
@@ -54,6 +58,13 @@ func (s *Scanner) onScrapped(corpus string) colly.ScrapedCallback {
 // onHTML
 func (s *Scanner) onHTML(corpus string) colly.HTMLCallback {
 	return func(e *colly.HTMLElement) {
-		// TODO: check hop count, generate and send new job
+		// TODO: check hop count
+		url := e.Attr("href")
+		if strings.HasPrefix(url, "/") {
+			url = fmt.Sprintf("http://%s%s", e.Request.URL.Host, url)
+		}
+		if err := s.channel.Send(NewJob(corpus, url)); err != nil {
+			log.Printf("couldn't send job to channel: %v\n", err)
+		}
 	}
 }

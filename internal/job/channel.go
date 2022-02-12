@@ -1,18 +1,16 @@
 package job
 
 import (
-	"context"
-
 	"github.com/pkg/errors"
 )
 
 // Channel
 type Channel interface {
 	// Send
-	Send(ctx context.Context, j *Job) error
+	Send(j *Job) error
 
 	// Stream
-	Stream(ctx context.Context) <-chan *Job
+	Stream() <-chan *Job
 }
 
 // channel implements Channel interface.
@@ -29,7 +27,7 @@ func NewChannel(scanType ScanType, buffer int) Channel {
 	}
 }
 
-func (ch *channel) Send(_ context.Context, j *Job) error {
+func (ch *channel) Send(j *Job) error {
 	if j.ScanType != ch.scanType {
 		return errors.Errorf(
 			"error: can't send %s job to %s channel",
@@ -40,4 +38,4 @@ func (ch *channel) Send(_ context.Context, j *Job) error {
 	return nil
 }
 
-func (ch *channel) Stream(_ context.Context) <-chan *Job { return ch.jobs }
+func (ch *channel) Stream() <-chan *Job { return ch.jobs }

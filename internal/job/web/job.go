@@ -9,6 +9,9 @@ type JobPayload struct {
 }
 
 // NewJob
-func NewJob(corpus string, payload *JobPayload) *job.Job {
+func NewJob(corpus, url string) *job.Job {
+	payload := &JobPayload{
+		URL: url,
+	}
 	return job.New(job.ScanTypeWeb, corpus, payload)
 }
