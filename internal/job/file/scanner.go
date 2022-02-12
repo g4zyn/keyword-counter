@@ -6,15 +6,17 @@ import (
 	"github.com/mgajin/keyword-counter/internal/job"
 )
 
+var _ job.Scanner = (*Scanner)(nil)
+
 // Scanner
-type Scanner struct {
-	*job.Scanner
-}
+type Scanner struct{}
 
 // NewScanner
-func NewScanner(channel job.Channel) *Scanner {
+func NewScanner() *Scanner {
 	return &Scanner{}
 }
 
-// scanFile
-func (s *Scanner) scanFile(ctx context.Context, j *job.Job) {}
+// ScanJob
+func (s *Scanner) ScanJob(ctx context.Context, j *job.Job) error {
+	return nil
+}

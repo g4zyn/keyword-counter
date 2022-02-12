@@ -9,6 +9,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+var _ job.Scanner = (*Scanner)(nil)
+
 // Scanner
 type Scanner struct {
 	channel job.Channel
@@ -21,23 +23,8 @@ func NewScanner(channel job.Channel) *Scanner {
 	}
 }
 
-// Scan
-func (s *Scanner) Scan(ctx context.Context) job.ScannerFunc {
-	return func(payload interface{}) interface{} {
-		j, ok := payload.(*job.Job)
-		if !ok {
-			log.Printf("error: can't cast type %T to Job", payload)
-			return nil
-		}
-		if err := s.scanJob(ctx, j); err != nil {
-			log.Printf("error scanning web job: %v\n", err)
-		}
-		return nil
-	}
-}
-
-// scanJob
-func (s *Scanner) scanJob(ctx context.Context, j *job.Job) error {
+// ScanJob
+func (s *Scanner) ScanJob(ctx context.Context, j *job.Job) error {
 	payload, ok := j.Payload.(*JobPayload)
 	if !ok {
 		return errors.Errorf("error: can't cast type %T to web JobPayload", payload)
