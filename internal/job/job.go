@@ -3,6 +3,7 @@ package job
 import (
 	"context"
 
+	"github.com/Jeffail/tunny"
 	"github.com/pkg/errors"
 )
 
@@ -17,13 +18,17 @@ const (
 
 // Job
 type Job struct {
-	ScanType ScanType
+	ScanType   ScanType
+	CorpusName string
+	Payload    interface{}
 }
 
 // New returns new Job.
-func New(scanType ScanType) *Job {
+func New(scanType ScanType, corpusName string, payload interface{}) *Job {
 	return &Job{
-		ScanType: scanType,
+		ScanType:   scanType,
+		CorpusName: corpusName,
+		Payload:    payload,
 	}
 }
 
@@ -36,11 +41,19 @@ type Channel interface {
 	Stream(ctx context.Context) <-chan *Job
 }
 
-// NewChannel
-func NewChannel(scanType ScanType, buffer int) Channel {
-	return &channel{
-		scanType: scanType,
-		jobs:     make(chan *Job, buffer),
+// ScannerFunc
+type ScannerFunc func(ctx context.Context, j *Job)
+
+// scanner
+type Scanner struct {
+	Channel Channel
+	Pool    *tunny.Pool
+}
+
+func NewScanner(ch Channel, pool *tunny.Pool) *Scanner {
+	return &Scanner{
+		Channel: ch,
+		Pool:    pool,
 	}
 }
 
@@ -48,6 +61,14 @@ func NewChannel(scanType ScanType, buffer int) Channel {
 type channel struct {
 	scanType ScanType
 	jobs     chan *Job
+}
+
+// NewChannel
+func NewChannel(scanType ScanType, buffer int) Channel {
+	return &channel{
+		scanType: scanType,
+		jobs:     make(chan *Job, buffer),
+	}
 }
 
 func (ch *channel) Send(_ context.Context, j *Job) error {
