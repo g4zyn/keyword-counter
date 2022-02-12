@@ -3,7 +3,6 @@ package job
 import (
 	"context"
 
-	"github.com/Jeffail/tunny"
 	"github.com/pkg/errors"
 )
 
@@ -39,22 +38,6 @@ type Channel interface {
 
 	// Stream
 	Stream(ctx context.Context) <-chan *Job
-}
-
-// ScannerFunc
-type ScannerFunc func(ctx context.Context, j *Job)
-
-// scanner
-type Scanner struct {
-	Channel Channel
-	Pool    *tunny.Pool
-}
-
-func NewScanner(ch Channel, pool *tunny.Pool) *Scanner {
-	return &Scanner{
-		Channel: ch,
-		Pool:    pool,
-	}
 }
 
 // channel implements Channel interface.

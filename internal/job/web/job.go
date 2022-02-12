@@ -2,8 +2,13 @@ package web
 
 import "github.com/mgajin/keyword-counter/internal/job"
 
-type JobPayload struct{}
+// JobPayload
+type JobPayload struct {
+	URL      string
+	HopCount int
+}
 
-func NewJob(corpus string) *job.Job {
-	return job.New(job.ScanTypeWeb, corpus, nil)
+// NewJob
+func NewJob(corpus string, payload *JobPayload) *job.Job {
+	return job.New(job.ScanTypeWeb, corpus, payload)
 }
