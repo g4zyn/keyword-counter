@@ -1,8 +1,6 @@
 package file
 
 import (
-	"context"
-
 	"github.com/mgajin/keyword-counter/internal/job"
 )
 
@@ -17,6 +15,6 @@ func NewScanner() *Scanner {
 }
 
 // ScanJob
-func (s *Scanner) ScanJob(ctx context.Context, j *job.Job) error {
+func (s *Scanner) ScanJob(j *job.Job) error {
 	return nil
 }

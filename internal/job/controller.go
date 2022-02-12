@@ -2,6 +2,7 @@ package job
 
 import (
 	"context"
+	"log"
 
 	"github.com/Jeffail/tunny"
 )
@@ -13,16 +14,21 @@ type Controller struct {
 }
 
 // NewController
-func NewController(
-	ctx context.Context,
-	channel Channel,
-	poolSize int,
-	scanner Scanner,
-) *Controller {
+func NewController(channel Channel, poolSize int, scanner Scanner) *Controller {
 	return &Controller{
 		channel: channel,
-		pool:    tunny.NewFunc(poolSize, Scan(ctx, scanner)),
+		pool:    tunny.NewFunc(poolSize, Scan(scanner)),
 	}
 }
 
-func (c *Controller) Start(ctx context.Context) {}
+// Start
+func (c *Controller) Start(ctx context.Context) {
+	for {
+		go func(ctx context.Context, j <-chan *Job) {
+			if _, err := c.pool.ProcessCtx(ctx, j); err != nil {
+				log.Printf("failed to process job: %v\n", err)
+				return
+			}
+		}(ctx, c.channel.Stream(ctx))
+	}
+}

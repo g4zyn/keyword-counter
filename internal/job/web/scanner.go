@@ -1,8 +1,6 @@
 package web
 
 import (
-	"context"
-
 	"github.com/gocolly/colly"
 	"github.com/mgajin/keyword-counter/internal/job"
 	"github.com/pkg/errors"
@@ -23,16 +21,16 @@ func NewScanner(channel job.Channel) *Scanner {
 }
 
 // ScanJob
-func (s *Scanner) ScanJob(ctx context.Context, j *job.Job) error {
+func (s *Scanner) ScanJob(j *job.Job) error {
 	p, ok := j.Payload.(*JobPayload)
 	if !ok {
 		return errors.Errorf("error: can't cast type %T to web JobPayload", p)
 	}
-	return s.scanWeb(ctx, j.CorpusName, p.URL)
+	return s.scanWeb(j.CorpusName, p.URL)
 }
 
 // scanWeb
-func (s *Scanner) scanWeb(ctx context.Context, corpus, url string) error {
+func (s *Scanner) scanWeb(corpus, url string) error {
 	collector := colly.NewCollector()
 	collector.IgnoreRobotsTxt = true
 
