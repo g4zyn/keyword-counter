@@ -2,7 +2,6 @@ package web
 
 import (
 	"context"
-	"log"
 
 	"github.com/gocolly/colly"
 	"github.com/mgajin/keyword-counter/internal/job"
@@ -25,29 +24,36 @@ func NewScanner(channel job.Channel) *Scanner {
 
 // ScanJob
 func (s *Scanner) ScanJob(ctx context.Context, j *job.Job) error {
-	payload, ok := j.Payload.(*JobPayload)
+	p, ok := j.Payload.(*JobPayload)
 	if !ok {
-		return errors.Errorf("error: can't cast type %T to web JobPayload", payload)
+		return errors.Errorf("error: can't cast type %T to web JobPayload", p)
 	}
+	return s.scanWeb(ctx, j.CorpusName, p.URL)
+}
+
+// scanWeb
+func (s *Scanner) scanWeb(ctx context.Context, corpus, url string) error {
 	collector := colly.NewCollector()
 	collector.IgnoreRobotsTxt = true
-	// TODO: add hop count
-	collector.OnHTML("a[href]", s.onHTML(j.CorpusName))
-	collector.OnScraped(s.onScrapped(j.CorpusName))
 
-	if err := collector.Visit(payload.URL); err != nil {
-		log.Printf("failed to scan web job: %v\n", err)
+	collector.OnHTML("a[href]", s.onHTML(corpus))
+	collector.OnScraped(s.onScrapped(corpus))
+
+	if err := collector.Visit(url); err != nil {
+		return errors.Wrapf(err, "visit url: %s of corpus: %s", url, corpus)
 	}
 
 	return nil
 }
 
+// onScrapped
 func (s *Scanner) onScrapped(corpus string) colly.ScrapedCallback {
 	return func(r *colly.Response) {
 		// TODO: count words and submit result
 	}
 }
 
+// onHTML
 func (s *Scanner) onHTML(corpus string) colly.HTMLCallback {
 	return func(e *colly.HTMLElement) {
 		// TODO: check hop count, generate and send new job
