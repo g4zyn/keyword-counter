@@ -86,7 +86,7 @@ func (c *Crawler) AddPath(ctx context.Context, path string) error {
 // crawlDir
 func (c *Crawler) crawlDir(ctx context.Context, path string) {
 	walkFunc := func(path string, d fs.DirEntry, err error) error {
-		if !d.IsDir() || strings.HasPrefix(path, c.prefix) {
+		if !d.IsDir() || !strings.HasPrefix(path, c.prefix) {
 			return nil
 		}
 		if err := c.channel.Send(NewJob(d.Name(), path)); err != nil {
