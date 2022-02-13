@@ -41,7 +41,7 @@ func (s *Scanner) scanWeb(corpus, url string) error {
 	collector := colly.NewCollector()
 	collector.IgnoreRobotsTxt = true
 
-	collector.OnHTML("a[href]", s.onHTML(corpus))
+	collector.OnHTML("a[href]", s.onLink(corpus))
 	collector.OnScraped(s.onScraped(corpus))
 
 	if err := collector.Visit(url); err != nil {
@@ -49,6 +49,20 @@ func (s *Scanner) scanWeb(corpus, url string) error {
 	}
 
 	return nil
+}
+
+// onLink
+func (s *Scanner) onLink(corpus string) colly.HTMLCallback {
+	return func(e *colly.HTMLElement) {
+		// TODO: check hop count
+		url := e.Attr("href")
+		if strings.HasPrefix(url, "/") {
+			url = fmt.Sprintf("http://%s%s", e.Request.URL.Host, url)
+		}
+		if err := s.channel.Send(NewJob(corpus, url)); err != nil {
+			log.Printf("couldn't send job to channel: %v\n", err)
+		}
+	}
 }
 
 // onScraped
@@ -60,19 +74,5 @@ func (s *Scanner) onScraped(corpus string) colly.ScrapedCallback {
 		summary := wc.CountWords(string(r.Body))
 		result.New(corpus, summary)
 		// TODO: submit result
-	}
-}
-
-// onHTML
-func (s *Scanner) onHTML(corpus string) colly.HTMLCallback {
-	return func(e *colly.HTMLElement) {
-		// TODO: check hop count
-		url := e.Attr("href")
-		if strings.HasPrefix(url, "/") {
-			url = fmt.Sprintf("http://%s%s", e.Request.URL.Host, url)
-		}
-		if err := s.channel.Send(NewJob(corpus, url)); err != nil {
-			log.Printf("couldn't send job to channel: %v\n", err)
-		}
 	}
 }
