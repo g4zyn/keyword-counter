@@ -1,6 +1,9 @@
 package dir
 
-import "github.com/mgajin/keyword-counter/internal/job"
+import (
+	"github.com/mgajin/keyword-counter/internal/job"
+	"github.com/pkg/errors"
+)
 
 var _ job.Scanner = (*Scanner)(nil)
 
@@ -22,10 +25,14 @@ func NewScanner(dirChannel, fileChannel job.Channel) *Scanner {
 
 // ScanJob
 func (s *Scanner) ScanJob(j *job.Job) error {
-	return nil
+	p, ok := j.Payload.(*JobPayload)
+	if !ok {
+		return errors.Errorf("can't cast type %T to dir JobPayload", j.Payload)
+	}
+	return s.scanDir(j.CorpusName, p.Path)
 }
 
 // scanDir
-func (s *Scanner) scanDir() error {
+func (s *Scanner) scanDir(corpus, path string) error {
 	return nil
 }
