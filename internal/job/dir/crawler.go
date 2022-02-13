@@ -90,7 +90,7 @@ func (c *Crawler) crawlDir(ctx context.Context, path string) {
 		}
 		if err := c.channel.Send(NewJob(d.Name(), path)); err != nil {
 			// error is not returned because we don't want to continue crawling.
-			log.Panicf("failed to send job to channel: %v\n", err)
+			log.Printf("failed to send job to channel: %v\n", err)
 		}
 		return fs.SkipDir
 	}
