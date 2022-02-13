@@ -4,12 +4,14 @@ import "github.com/mgajin/keyword-counter/internal/job"
 
 var _ job.Scanner = (*Scanner)(nil)
 
+// Scanner
 type Scanner struct {
-	channels map[job.ScanType]job.Channel
+	channels job.Channels
 }
 
+// NewScanner
 func NewScanner(dirChannel, fileChannel job.Channel) *Scanner {
-	channels := map[job.ScanType]job.Channel{
+	channels := job.Channels{
 		job.ScanTypeDir:  dirChannel,
 		job.ScanTypeFile: fileChannel,
 	}
@@ -18,10 +20,12 @@ func NewScanner(dirChannel, fileChannel job.Channel) *Scanner {
 	}
 }
 
+// ScanJob
 func (s *Scanner) ScanJob(j *job.Job) error {
 	return nil
 }
 
+// scanDir
 func (s *Scanner) scanDir() error {
 	return nil
 }
