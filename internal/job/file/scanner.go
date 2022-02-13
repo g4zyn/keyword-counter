@@ -32,7 +32,7 @@ func (s *Scanner) scanFile(corpus, path string) error {
 		return err
 	}
 	summary := wc.CountWords(string(data))
-	result.New(corpus, summary)
+	result.New(corpus, job.ScanTypeFile, summary)
 	// TODO: submit result
 	return nil
 }

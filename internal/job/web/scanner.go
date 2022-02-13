@@ -73,7 +73,7 @@ func (s *Scanner) onScraped(corpus string) colly.ScrapedCallback {
 			return
 		}
 		summary := wc.CountWords(string(r.Body))
-		result.New(corpus, summary)
+		result.New(corpus, job.ScanTypeWeb, summary)
 		// TODO: submit result
 	}
 }
