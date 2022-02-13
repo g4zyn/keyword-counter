@@ -2,8 +2,11 @@ package dir
 
 import (
 	"context"
+	"io/fs"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -39,14 +42,22 @@ func NewCrawler(prefix string, sleepTime time.Duration, channel job.Channel) *Cr
 func (c *Crawler) Start(ctx context.Context) {
 	ticker := time.NewTicker(c.sleepTime)
 	defer ticker.Stop()
+
 	for {
 		<-ticker.C
-		go c.crawl(ctx)
+		go func() {
+			defer c.mu.Unlock()
+			c.mu.Lock()
+
+			for _, path := range c.paths {
+				c.crawlDir(ctx, path)
+			}
+		}()
 	}
 }
 
 // AddPath adds new directory path that has to be crawled.
-func (c *Crawler) AddPath(path string) error {
+func (c *Crawler) AddPath(ctx context.Context, path string) error {
 	defer c.mu.Unlock()
 	c.mu.Lock()
 
@@ -67,9 +78,28 @@ func (c *Crawler) AddPath(path string) error {
 		}
 	}
 	c.paths = append(c.paths, path)
+	go c.crawlDir(ctx, path)
 
 	return nil
 }
 
-// crawl
-func (c *Crawler) crawl(ctx context.Context) {}
+// crawlDir
+func (c *Crawler) crawlDir(ctx context.Context, path string) {
+	walkFunc := func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() {
+			return nil
+		}
+		if strings.HasPrefix(path, c.prefix) {
+			return nil
+		}
+		if err := c.channel.Send(NewJob(d.Name(), path)); err != nil {
+			// error is not returned because we don't want to continue with crawling.
+			log.Panicf("failed to send job to channel: %v\n", err)
+		}
+		return fs.SkipDir
+	}
+
+	if err := filepath.WalkDir(path, walkFunc); err != nil {
+		log.Printf("failed to crawl directory: %v\n", err)
+	}
+}
