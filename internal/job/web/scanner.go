@@ -8,6 +8,8 @@ import (
 
 	"github.com/gocolly/colly"
 	"github.com/mgajin/keyword-counter/internal/job"
+	"github.com/mgajin/keyword-counter/internal/result"
+	"github.com/mgajin/keyword-counter/internal/wc"
 	"github.com/pkg/errors"
 )
 
@@ -40,7 +42,7 @@ func (s *Scanner) scanWeb(corpus, url string) error {
 	collector.IgnoreRobotsTxt = true
 
 	collector.OnHTML("a[href]", s.onHTML(corpus))
-	collector.OnScraped(s.onScrapped(corpus))
+	collector.OnScraped(s.onScraped(corpus))
 
 	if err := collector.Visit(url); err != nil {
 		return errors.Wrapf(err, "visit url: %s of corpus: %s", url, corpus)
@@ -49,12 +51,14 @@ func (s *Scanner) scanWeb(corpus, url string) error {
 	return nil
 }
 
-// onScrapped
-func (s *Scanner) onScrapped(corpus string) colly.ScrapedCallback {
+// onScraped
+func (s *Scanner) onScraped(corpus string) colly.ScrapedCallback {
 	return func(r *colly.Response) {
 		if r.StatusCode != http.StatusOK {
 			return
 		}
+		summary := wc.CountWords(string(r.Body))
+		result.New(corpus, summary)
 		// TODO: submit result
 	}
 }
