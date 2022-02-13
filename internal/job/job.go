@@ -5,6 +5,7 @@ type ScanType string
 
 // Job types
 const (
+	ScanTypeDir  ScanType = "DIR"
 	ScanTypeFile ScanType = "FILE"
 	ScanTypeWeb  ScanType = "WEB"
 )
