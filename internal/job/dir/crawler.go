@@ -2,10 +2,13 @@ package dir
 
 import (
 	"context"
+	"log"
+	"os"
 	"sync"
 	"time"
 
 	"github.com/mgajin/keyword-counter/internal/job"
+	"github.com/pkg/errors"
 )
 
 // Crawler
@@ -42,8 +45,29 @@ func (c *Crawler) Start(ctx context.Context) {
 	}
 }
 
-// AddPath
+// AddPath adds new directory path that has to be crawled.
 func (c *Crawler) AddPath(path string) error {
+	defer c.mu.Unlock()
+	c.mu.Lock()
+
+	// we want to make sure that path exists and that it is directory.
+	info, err := os.Stat(path)
+	if err != nil {
+		return err
+	}
+	if !info.IsDir() {
+		return errors.Errorf("error: path %s is not directory", path)
+	}
+
+	// check if path is already added.
+	for _, p := range c.paths {
+		if p == path {
+			log.Printf("path: %s is already added.", path)
+			return nil
+		}
+	}
+	c.paths = append(c.paths, path)
+
 	return nil
 }
 
