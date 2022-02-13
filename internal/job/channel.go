@@ -13,6 +13,31 @@ type Channel interface {
 	stream() <-chan *Job
 }
 
+// NewChannel
+func NewChannel(scanType ScanType, buffer int) Channel { return newChannel(scanType, buffer) }
+
+// Channels
+type Channels map[ScanType]Channel
+
+// Get
+func (cc Channels) Get(st ScanType) (Channel, error) {
+	if ch, ok := cc[st]; ok {
+		return ch, nil
+	}
+	return nil, errors.Errorf("channel for scan type %v not found", st)
+}
+
+// RegisterChannels
+func RegisterChannels(buffer int, scanTypes ...ScanType) Channels {
+	channels := make(Channels)
+	for _, st := range scanTypes {
+		channels[st] = newChannel(st, buffer)
+	}
+	return channels
+}
+
+var _ Channel = (*channel)(nil)
+
 // channel implements Channel interface.
 type channel struct {
 	scanType ScanType
@@ -20,7 +45,7 @@ type channel struct {
 }
 
 // NewChannel
-func NewChannel(scanType ScanType, buffer int) Channel {
+func newChannel(scanType ScanType, buffer int) *channel {
 	return &channel{
 		scanType: scanType,
 		jobs:     make(chan *Job, buffer),
