@@ -69,6 +69,7 @@ func (s *Scanner) onLink(corpus string) colly.HTMLCallback {
 func (s *Scanner) onScraped(corpus string) colly.ScrapedCallback {
 	return func(r *colly.Response) {
 		if r.StatusCode != http.StatusOK {
+			log.Printf("failed to scrape url: %s", r.Request.URL)
 			return
 		}
 		summary := wc.CountWords(string(r.Body))
