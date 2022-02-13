@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/gocolly/colly"
@@ -51,7 +52,10 @@ func (s *Scanner) scanWeb(corpus, url string) error {
 // onScrapped
 func (s *Scanner) onScrapped(corpus string) colly.ScrapedCallback {
 	return func(r *colly.Response) {
-		// TODO: count words and submit result
+		if r.StatusCode != http.StatusOK {
+			return
+		}
+		// TODO: submit result
 	}
 }
 
