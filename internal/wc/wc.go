@@ -10,9 +10,9 @@ import (
 // CountWords
 func CountWords(content string) result.Summary {
 	// function to detect word separators.
-	ff := func(r rune) bool { return !unicode.IsLetter(r) }
+	f := func(r rune) bool { return !unicode.IsLetter(r) }
 	// split content into slice of words.
-	words := strings.FieldsFunc(content, ff)
+	words := strings.FieldsFunc(content, f)
 
 	summary := make(result.Summary)
 	for _, word := range words {
