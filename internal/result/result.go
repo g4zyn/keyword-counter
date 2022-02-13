@@ -1,7 +1,18 @@
 package result
 
-type Result struct{}
+// Summary
+type Summary map[string]int
+
+type Result struct {
+	CorpusName string
+	Summary    Summary
+}
 
 type Store interface{}
 
-func New(corpus string, res map[string]int) {}
+func New(corpus string, summary Summary) {
+	_ = &Result{
+		CorpusName: corpus,
+		Summary:    summary,
+	}
+}

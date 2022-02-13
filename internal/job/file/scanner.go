@@ -31,8 +31,8 @@ func (s *Scanner) scanFile(corpus, path string) error {
 	if err != nil {
 		return err
 	}
-	results := wc.CountWords(string(data))
-	result.New(corpus, results)
+	summary := wc.CountWords(string(data))
+	result.New(corpus, summary)
 	// TODO: submit result
 	return nil
 }
