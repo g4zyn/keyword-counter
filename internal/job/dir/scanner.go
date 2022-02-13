@@ -1,7 +1,11 @@
 package dir
 
 import (
+	"io/fs"
+	"path/filepath"
+
 	"github.com/mgajin/keyword-counter/internal/job"
+	"github.com/mgajin/keyword-counter/internal/job/file"
 	"github.com/pkg/errors"
 )
 
@@ -9,17 +13,13 @@ var _ job.Scanner = (*Scanner)(nil)
 
 // Scanner
 type Scanner struct {
-	channels job.Channels
+	channel job.Channel
 }
 
 // NewScanner
-func NewScanner(dirChannel, fileChannel job.Channel) *Scanner {
-	channels := job.Channels{
-		job.ScanTypeDir:  dirChannel,
-		job.ScanTypeFile: fileChannel,
-	}
+func NewScanner(channel job.Channel) *Scanner {
 	return &Scanner{
-		channels: channels,
+		channel: channel,
 	}
 }
 
@@ -34,5 +34,20 @@ func (s *Scanner) ScanJob(j *job.Job) error {
 
 // scanDir
 func (s *Scanner) scanDir(corpus, path string) error {
+	// function that creates scan file jobs for files inside dir tree.
+	walkFunc := func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		return s.channel.Send(file.NewJob(corpus, path, 0))
+	}
+
+	if err := filepath.WalkDir(path, walkFunc); err != nil {
+		return errors.Wrapf(err, "walk dir: %s", path)
+	}
+
 	return nil
 }
