@@ -53,7 +53,7 @@ func newChannel(scanType ScanType, buffer int) *channel {
 }
 
 func (ch *channel) Send(j *Job) error {
-	if j.ScanType != ch.scanType {
+	if ch.scanType != j.ScanType {
 		return errors.Errorf(
 			"error: can't send %s job to %s channel",
 			j.ScanType, ch.scanType,
