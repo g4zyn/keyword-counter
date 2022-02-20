@@ -51,7 +51,7 @@ func (c *Crawler) Start(ctx context.Context) {
 			for _, path := range c.paths {
 				c.crawlDir(ctx, path)
 			}
-		}(<-ticker.C)
+		}(ticker.C)
 	}
 }
 
