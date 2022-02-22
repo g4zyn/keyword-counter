@@ -3,25 +3,26 @@ package wc
 import (
 	"strings"
 	"unicode"
-
-	"github.com/mgajin/keyword-counter/internal/result"
 )
 
+// Result
+type Result map[string]int
+
 // CountWords
-func CountWords(content string) result.Summary {
+func CountWords(content string) Result {
 	// function to detect word separators.
 	f := func(r rune) bool { return !unicode.IsLetter(r) }
 	// split content into slice of words.
 	words := strings.FieldsFunc(content, f)
 
-	summary := make(result.Summary)
+	res := make(Result)
 	for _, word := range words {
-		if res, ok := summary[word]; ok {
-			summary[word] = res + 1
+		if count, ok := res[word]; ok {
+			res[word] = count + 1
 		} else {
-			summary[word] = 0
+			res[word] = 0
 		}
 	}
 
-	return summary
+	return res
 }

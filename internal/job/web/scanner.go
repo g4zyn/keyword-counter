@@ -8,7 +8,6 @@ import (
 
 	"github.com/gocolly/colly"
 	"github.com/mgajin/keyword-counter/internal/job"
-	"github.com/mgajin/keyword-counter/internal/result"
 	"github.com/mgajin/keyword-counter/internal/wc"
 	"github.com/pkg/errors"
 )
@@ -72,8 +71,7 @@ func (s *Scanner) onScraped(corpus string) colly.ScrapedCallback {
 			log.Printf("failed to scrape url: %s", r.Request.URL)
 			return
 		}
-		summary := wc.CountWords(string(r.Body))
-		result.New(corpus, job.ScanTypeWeb, summary)
+		_ = wc.CountWords(string(r.Body))
 		// TODO: submit result
 	}
 }

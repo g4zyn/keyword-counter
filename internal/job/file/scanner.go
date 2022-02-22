@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/mgajin/keyword-counter/internal/job"
-	"github.com/mgajin/keyword-counter/internal/result"
 	"github.com/mgajin/keyword-counter/internal/wc"
 	"github.com/pkg/errors"
 )
@@ -31,8 +30,7 @@ func (s *Scanner) scanFile(corpus, path string) error {
 	if err != nil {
 		return err
 	}
-	summary := wc.CountWords(string(data))
-	result.New(corpus, job.ScanTypeFile, summary)
+	_ = wc.CountWords(string(data))
 	// TODO: submit result
 	return nil
 }
