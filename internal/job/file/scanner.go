@@ -1,9 +1,11 @@
 package file
 
 import (
+	"context"
 	"os"
 
 	"github.com/mgajin/keyword-counter/internal/job"
+	"github.com/mgajin/keyword-counter/internal/result"
 	"github.com/mgajin/keyword-counter/internal/wc"
 	"github.com/pkg/errors"
 )
@@ -11,10 +13,16 @@ import (
 var _ job.Scanner = (*Scanner)(nil)
 
 // Scanner
-type Scanner struct{}
+type Scanner struct {
+	results result.Store
+}
 
 // NewScanner
-func NewScanner() *Scanner { return &Scanner{} }
+func NewScanner(results result.Store) *Scanner {
+	return &Scanner{
+		results: results,
+	}
+}
 
 // ScanJob
 func (s *Scanner) ScanJob(j *job.Job) error {
@@ -30,7 +38,10 @@ func (s *Scanner) scanFile(corpus, path string) error {
 	if err != nil {
 		return err
 	}
-	_ = wc.CountWords(string(data))
-	// TODO: submit result
-	return nil
+	res := &result.Result{
+		ScanType:   job.ScanTypeFile,
+		CorpusName: corpus,
+		WordCount:  wc.CountWords(string(data)),
+	}
+	return s.results.AddResult(context.Background(), res)
 }

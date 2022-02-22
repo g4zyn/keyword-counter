@@ -5,24 +5,24 @@ import (
 	"unicode"
 )
 
-// Result
-type Result map[string]int
+// WordCount
+type WordCount map[string]int
 
 // CountWords
-func CountWords(content string) Result {
+func CountWords(content string) WordCount {
 	// function to detect word separators.
 	f := func(r rune) bool { return !unicode.IsLetter(r) }
 	// split content into slice of words.
 	words := strings.FieldsFunc(content, f)
 
-	res := make(Result)
+	wc := make(WordCount)
 	for _, word := range words {
-		if count, ok := res[word]; ok {
-			res[word] = count + 1
+		if count, ok := wc[word]; ok {
+			wc[word] = count + 1
 		} else {
-			res[word] = 0
+			wc[word] = 0
 		}
 	}
 
-	return res
+	return wc
 }

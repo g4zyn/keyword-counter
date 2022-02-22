@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/gocolly/colly"
 	"github.com/mgajin/keyword-counter/internal/job"
+	"github.com/mgajin/keyword-counter/internal/result"
 	"github.com/mgajin/keyword-counter/internal/wc"
 	"github.com/pkg/errors"
 )
@@ -16,12 +18,14 @@ var _ job.Scanner = (*Scanner)(nil)
 
 // Scanner
 type Scanner struct {
+	results result.Store
 	channel job.Channel
 }
 
 // NewScanner
-func NewScanner(channel job.Channel) *Scanner {
+func NewScanner(results result.Store, channel job.Channel) *Scanner {
 	return &Scanner{
+		results: results,
 		channel: channel,
 	}
 }
@@ -71,7 +75,13 @@ func (s *Scanner) onScraped(corpus string) colly.ScrapedCallback {
 			log.Printf("failed to scrape url: %s", r.Request.URL)
 			return
 		}
-		_ = wc.CountWords(string(r.Body))
-		// TODO: submit result
+		res := &result.Result{
+			ScanType:   job.ScanTypeWeb,
+			CorpusName: corpus,
+			WordCount:  wc.CountWords(string(r.Body)),
+		}
+		if err := s.results.AddResult(context.Background(), res); err != nil {
+			log.Printf("failed to add result: %+v\n", err)
+		}
 	}
 }
