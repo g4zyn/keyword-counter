@@ -44,14 +44,19 @@ func (c *Crawler) Start(ctx context.Context) {
 	defer ticker.Stop()
 
 	for {
-		go func(_ <-chan time.Time) {
-			defer c.mu.Unlock()
-			c.mu.Lock()
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			go func(_ <-chan time.Time) {
+				defer c.mu.Unlock()
+				c.mu.Lock()
 
-			for _, path := range c.paths {
-				c.crawlDir(ctx, path)
-			}
-		}(ticker.C)
+				for _, path := range c.paths {
+					c.crawlDir(ctx, path)
+				}
+			}(ticker.C)
+		}
 	}
 }
 
